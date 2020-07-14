@@ -15,9 +15,25 @@ public class FieldController : MonoBehaviour, ITickable
 
         _fieldModel.CreateField();
         _fieldModel.FillBorders();
+        _fieldModel.ChangeShape();
 
         CreateField();
         CreateShapeObjects();
+
+        _fieldModel.FieldChanged += UpdateField;
+    }
+
+    public void Restart()
+    {
+        _fieldModel.CreateField();
+        _fieldModel.FillBorders();
+        _fieldModel.ChangeShape();
+    }
+
+    private void UpdateField()
+    {
+        ClearField();
+        CreateField();
     }
 
     private void Update()
@@ -99,6 +115,7 @@ public class FieldController : MonoBehaviour, ITickable
         {
             _fieldModel.AddShapeToField();
             _fieldModel.CreateShape();
+            _fieldModel.ChangeShape();
 
             ClearField();
             CreateField();
@@ -113,9 +130,10 @@ public class FieldController : MonoBehaviour, ITickable
         {
             for (int y = 0; y < _fieldModel.SizeY; y++)
             {
-                if (_fieldModel.Shape[x, y] == 1)
+                if (_fieldModel.Shape[x, y] != 0)
                 {
                     _shapeObjects[objIndex].transform.position = new Vector2(x, y);
+                    _shapeObjects[objIndex].GetComponent<MeshRenderer>().material.color = _fieldModel.ShapeColors[_fieldModel.Shape[x, y] - 1];
                     _shapeObjects[objIndex].SetActive(true);
 
                     objIndex++;

@@ -11,8 +11,16 @@ public class TickController : MonoBehaviour
     {
         _model = model;
         _controllers = controllers;
+    }
 
+    public void Play()
+    {
         InvokeRepeating("Tick", _model.RepeatRate, _model.RepeatRate);
+    }
+
+    public void Stop()
+    {
+        CancelInvoke("Tick");
     }
 
     private void Tick()

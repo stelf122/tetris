@@ -9,38 +9,57 @@ public class FieldModel : ScriptableObject
 {
     [SerializeField] private int _sizeX;
     [SerializeField] private int _sizeY;
+
+    // Prefab of the tile
     [SerializeField] private GameObject _box;
 
+    // Color for each shape
+    [SerializeField] private Color[] _shapeColors;
+
+    // Static field of the game
     private int[,] _field;
+
+    // Moveable shape
     private int[,] _shape;
 
+    // Next shape array
+    private int[,] _nextShape;
+
+    // Number represent color index of the tile
     private int[][,] _shapes = new int[][,] 
     { 
         new int[2, 4] { { 0, 1, 1, 0 },
                         { 0, 1, 1, 0 } },
         new int[2, 4] { { 0, 0, 0, 0 },
-                        { 1, 1, 1, 1 } },
-        new int[2, 4] { { 1, 0, 0, 0 },
-                        { 1, 1, 1, 0 } },
-        new int[2, 4] { { 0, 0, 1, 0 },
-                        { 1, 1, 1, 0 } },
-        new int[2, 4] { { 0, 1, 1, 0 },
-                        { 1, 1, 0, 0 } },
-        new int[2, 4] { { 1, 1, 0, 0 },
-                        { 0, 1, 1, 0 } },
-        new int[2, 4] { { 0, 1, 0, 0 },
-                        { 1, 1, 1, 0 } }
+                        { 2, 2, 2, 2 } },
+        new int[2, 4] { { 3, 0, 0, 0 },
+                        { 3, 3, 3, 0 } },
+        new int[2, 4] { { 0, 0, 4, 0 },
+                        { 4, 4, 4, 0 } },
+        new int[2, 4] { { 0, 5, 5, 0 },
+                        { 5, 5, 0, 0 } },
+        new int[2, 4] { { 6, 6, 0, 0 },
+                        { 0, 6, 6, 0 } },
+        new int[2, 4] { { 0, 7, 0, 0 },
+                        { 7, 7, 7, 0 } }
     };
 
     public float SizeX { get => _sizeX; }
     public float SizeY { get => _sizeY; }
     public GameObject Box { get => _box; }
+    public Color[] ShapeColors { get => _shapeColors; }
     public int[,] Field { get => _field; }
     public int[,] Shape { get => _shape; }
+    public int[,] NextShape { get => _nextShape; }
+
+    public event Action FieldChanged = delegate { };
+    public event Action NextShapeChanged = delegate { };
 
     public void CreateField()
     {
         _field = new int[_sizeX, _sizeY];
+
+        FieldChanged();
     }
 
     public void FillBorders()
@@ -55,13 +74,24 @@ public class FieldModel : ScriptableObject
         {
             _field[x, 0] = 1;
         }
+
+        FieldChanged();
+    }
+
+    public void ChangeShape()
+    {
+        int[,] randomShape = _shapes[Random.Range(0, _shapes.Length)];
+
+        _nextShape = randomShape;
+
+        NextShapeChanged();
     }
 
     public void CreateShape()
     {
         _shape = new int[_sizeX, _sizeY];
 
-        int[,] randomShape = _shapes[Random.Range(0, _shapes.Length)];
+        int[,] randomShape = _nextShape;
 
         int xOffset = _sizeX / 2 - 2;
 
@@ -89,6 +119,26 @@ public class FieldModel : ScriptableObject
                 }
             }
         }
+
+        FieldChanged();
+    }
+
+    public void ClearLine(int lineY)
+    {
+        for (int x = 1; x < _sizeX - 1; x++)
+        {
+            _field[x, lineY] = 0;
+        }
+
+        for (int y = lineY; y < _sizeY - 1; y++)
+        {
+            for (int x = 1; x < _sizeX - 1; x++)
+            {
+                _field[x, y] = _field[x, y + 1];
+            }
+        }
+
+        FieldChanged();
     }
 
     public bool MoveShapeDown()
