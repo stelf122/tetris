@@ -180,13 +180,14 @@ public class FieldModel : ScriptableObject
 
         FindStartingPoint(out startX, out startY);
 
-        Debug.Log(startX + " " + startY);
+        if (!CanRotate(startX, startY))
+            return;
 
         int[,] oldShape = new int[_sizeX, _sizeY];
 
         Array.Copy(_shape, oldShape, _shape.Length);
 
-        int maxSize = 5;
+        int maxSize = 4;
 
         for (int y = 0; y < maxSize; y++)
         {
@@ -211,16 +212,32 @@ public class FieldModel : ScriptableObject
                 _shape[newX, newY] = oldShape[oldX, oldY];
             }
         }
+    }
 
-        //_shape[0, 0] = oldShape[3, 0];
-        //_shape[1, 0] = oldShape[3, 1];
-        //_shape[2, 0] = oldShape[3, 2];
-        //_shape[3, 0] = oldShape[3, 3];
+    private bool CanRotate(int startX, int startY)
+    {
+        int maxSize = 4;
 
-        //_shape[0, 1] = oldShape[2, 0];
-        //_shape[1, 1] = oldShape[2, 1];
-        //_shape[2, 1] = oldShape[2, 2];
-        //_shape[3, 1] = oldShape[2, 3];
+        for (int y = 0; y < maxSize; y++)
+        {
+            for (int x = 0; x < maxSize; x++)
+            {
+                int newX = startX + x;
+                int newY = startY + y;
+
+                if (newX >= _sizeX || newY >= _sizeY)
+                {
+                    return false;
+                }
+
+                if (_field[newX, newY] != 0)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private void FindStartingPoint(out int startX, out int startY)
